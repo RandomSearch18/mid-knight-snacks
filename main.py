@@ -1,19 +1,70 @@
 import pygame
-
-WINDOW_WIDTH = 700
-WINDOW_HEIGHT = 500
-window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-pygame.display.set_caption("😋 Midnight Snacks")
+from math import ceil
+from pathlib import Path
 
 
-def main_loop():
-    running = True
-    while running:
+class GameConfig:
+    WINDOW_WIDTH = 1000
+    WINDOW_HEIGHT = 800
+
+
+class Drawable:
+    def draw(screen: pygame.display):
+        raise NotImplementedError("Not implemented")
+
+
+class GameBackground(Drawable):
+    def __init__(self):
+        self.image = pygame.image.load(Path("assets", "image.png"))
+        self.surface = self.image.convert()
+        self.size = self.surface.get_size()
+
+    def draw(self, screen: pygame.display):
+        screen_width, screen_height = screen.get_size()
+        tile_width, tile_height = self.size
+
+        repeats_x = ceil(screen_width / tile_width)
+        repeats_y = ceil(screen_height / tile_height)
+
+        for row in range(repeats_y):
+            for col in range(repeats_x):
+                screen.blit(self.surface, (row * tile_width, col * tile_height))
+
+
+class Game:
+    def __init__(self):
+        self.config = GameConfig()
+        self.window = pygame.display.set_mode(
+            (self.config.WINDOW_WIDTH, self.config.WINDOW_HEIGHT)
+        )
+        self.drawables = [GameBackground()]
+        self.clock = pygame.time.Clock()
+
+    def tick(self):
+        # Event handling!
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
                 pygame.quit()
                 # sys.exit()
 
+        # Update data!
 
-main_loop()
+        # Update the screen!
+        for drawable in self.drawables:
+            drawable.draw(self.window)
+
+    def main_loop(self):
+        should_run = True
+        while should_run:
+            self.tick()
+            self.clock.tick(30)
+
+    def run(self):
+        pygame.display.set_caption("😋 Mid-knight Snacks")
+        self.main_loop()
+
+
+pygame.init()
+game = Game()
+game.run()
