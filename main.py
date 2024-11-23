@@ -2,7 +2,13 @@ import pygame
 from math import ceil
 from pathlib import Path
 
+
 tile_size = 64
+
+# Music stuff
+pygame.mixer.init()
+pygame.mixer.music.load("assets/music.mp3")
+pygame.mixer.music.play(-1)  # infinitely loops over music
 
 
 class GameConfig:
@@ -42,23 +48,44 @@ class Player(Drawable):
         self.weight = 1
         self.width = 50
         self.height = 50
+        self.target_size = 50
 
     def draw(self, screen: pygame.surface.Surface):
         pygame.draw.rect(screen, (255, 0, 0), (self.x, self.y, self.width, self.height))
 
-    def is_on_ground(self, tilemap):
+    def is_on_ground(self, y, tilemap):
         bottom = self.y + self.height
         tilemap_row = bottom // tile_size
         tilemap_col = self.x // tile_size
         return tilemap[tilemap_row][tilemap_col] == 1
 
+    def is_in_beef(self, x, y, tilemap):
+        tilemap_row = y // tile_size
+        tilemap_col = x // tile_size
+        return tilemap[tilemap_row][tilemap_col] == 2
+
     def tick(self, game):
+        # new_y = self.y + self.velocity_y
+        # if self.is_on_ground(new_y, game.level.tilemap):
+        #     self.y = new_y - (new_y % tile_size)
+        #     self.velocity_y = 0
+        # else:
+        #     self.y = new_y
+
         self.x += self.velocity_x
         self.y += self.velocity_y
-        if not self.is_on_ground(game.level.tilemap):
+        if not self.is_on_ground(self.y, game.level.tilemap):
             self.velocity_y += self.weight
         else:
             self.velocity_y = 0
+
+        if self.is_in_beef(self.x, self.y, game.level.tilemap):
+            self.target_size = 200
+
+        size_increase_rate = 3
+        if self.width < self.target_size:
+            self.width += size_increase_rate
+            self.height += size_increase_rate
 
 
 class Game:
@@ -79,6 +106,7 @@ class Game:
             if event.type == pygame.QUIT:
                 running = False
                 pygame.quit()
+                pygame.mixer.music.stop()
                 # sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_a:
@@ -86,7 +114,8 @@ class Game:
                 elif event.key == pygame.K_d:
                     self.player.velocity_x = base_speed
                 elif event.key == pygame.K_SPACE:
-                    self.player.velocity_y = -20
+                    if self.player.is_on_ground(self.player.y, self.level.tilemap):
+                        self.player.velocity_y = -20
             elif event.type == pygame.KEYUP:
                 if event.key in [pygame.K_a, pygame.K_d]:
                     self.player.velocity_x = 0
