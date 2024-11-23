@@ -1,3 +1,4 @@
 {
-  "cSpell.words": ["blit", "drawables"]
+  "cSpell.words": ["blit", "drawables"],
+  "python.analysis.typeCheckingMode": "standard"
 }

@@ -9,7 +9,7 @@ class GameConfig:
 
 
 class Drawable:
-    def draw(screen: pygame.display):
+    def draw(self, screen: pygame.surface.Surface):
         raise NotImplementedError("Not implemented")
 
 
@@ -19,7 +19,7 @@ class GameBackground(Drawable):
         self.surface = self.image.convert()
         self.size = self.surface.get_size()
 
-    def draw(self, screen: pygame.display):
+    def draw(self, screen: pygame.surface.Surface):
         screen_width, screen_height = screen.get_size()
         tile_width, tile_height = self.size
 
@@ -28,7 +28,7 @@ class GameBackground(Drawable):
 
         for row in range(repeats_y):
             for col in range(repeats_x):
-                screen.blit(self.surface, (row * tile_width, col * tile_height))
+                screen.blit(self.surface, (col * tile_height, row * tile_width))
 
 
 class Game:
@@ -53,6 +53,7 @@ class Game:
         # Update the screen!
         for drawable in self.drawables:
             drawable.draw(self.window)
+        pygame.display.update()
 
     def main_loop(self):
         should_run = True
@@ -63,6 +64,11 @@ class Game:
     def run(self):
         pygame.display.set_caption("😋 Mid-knight Snacks")
         self.main_loop()
+
+
+class Map:
+    def __init_(self):
+        pass
 
 
 pygame.init()
