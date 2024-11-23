@@ -1,4 +1,4 @@
-# Misnight Snacks
+# Midnight Snacks
 
 Counterspell 2024
 
