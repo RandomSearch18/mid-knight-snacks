@@ -49,6 +49,8 @@ class Player(Drawable):
         self.width = 50
         self.height = 50
         self.target_size = 50
+        # So that we can detect when the player touches the beef for a second time, and so on
+        self.was_in_beef = False
 
     def draw(self, screen: pygame.surface.Surface):
         pygame.draw.rect(screen, (255, 0, 0), (self.x, self.y, self.width, self.height))
@@ -80,9 +82,17 @@ class Player(Drawable):
             self.velocity_y = 0
 
         if self.is_in_beef(self.x, self.y, game.level.tilemap):
-            self.target_size = 200
+            print("still in beef")
+            if not self.was_in_beef:
+                self.was_in_beef = True
+                self.target_size += 50
+        else:
+            if self.was_in_beef:
+                # TODO: Add a cooldown for the beef
+                print("No longer in beef")
+                self.was_in_beef = False
 
-        size_increase_rate = 3
+        size_increase_rate = 2
         if self.width < self.target_size:
             self.width += size_increase_rate
             self.height += size_increase_rate
