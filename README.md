@@ -1,8 +1,6 @@
-# Midnight Snacks
+# Mid-Knight Snacks
 
-Counterspell 2024
-
-Mish, Andrew and Morgan
+A castle- and beef-themed game, made during the [Counterspell](https://counterspell.hackclub.com/) game jam in Autumn 2024.
 
 ## How to run the game
 
@@ -16,3 +14,7 @@ Mish, Andrew and Morgan
 [Download or view the video (1.5 MB, mp4)](./demos/Mid-Knight%20Snacks.mp4)
 
 <video controls src="demos/Mid-Knight Snacks.mp4" title="Mid-Knight Snacks demo video"></video>
+
+## Credits
+
+Developed by Andrew, Mish and Morgan.
