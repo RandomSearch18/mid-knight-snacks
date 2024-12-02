@@ -1,5 +1,10 @@
 # Mid-Knight Snacks
 
+<p align="center">
+  <img hspace="4" src="https://img.shields.io/badge/a%20counterspell%20game-FEC2FB%3F?style=for-the-badge&logo=undertale&logoColor=ffffff&color=FF4186" alt="A Counterspell Game">
+  <img hspace="4" src="https://img.shields.io/badge/made%20for%20high%20seas-FEC2FB?style=for-the-badge&logo=hackclub&logoColor=1C4188" alt="Made for High Seas">
+</p>
+
 A castle- and beef-themed game, made during the [Counterspell](https://counterspell.hackclub.com/) game jam in Autumn 2024.
 
 ## How to run the game
