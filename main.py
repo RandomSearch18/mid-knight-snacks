@@ -1,5 +1,6 @@
+from __future__ import annotations
 import pygame
-from math import ceil
+from math import ceil, floor
 from pathlib import Path
 
 
@@ -40,7 +41,8 @@ class GameBackground(Drawable):
 
 
 class Player(Drawable):
-    def __init__(self):
+    def __init__(self, game: Game):
+        self.game = game
         self.x = 50
         self.y = 800 - (50 * 2 + 50)
         self.velocity_x = 0
@@ -49,15 +51,41 @@ class Player(Drawable):
         self.width = 50
         self.height = 50
         self.target_size = 50
+        # self.prev_tile_y: None | float = None
 
     def draw(self, screen: pygame.surface.Surface):
         pygame.draw.rect(screen, (255, 0, 0), (self.x, self.y, self.width, self.height))
 
-    def is_on_ground(self, y, tilemap):
+    def tile_y_bottom(self):
         bottom = self.y + self.height
-        tilemap_row = bottom // tile_size
-        tilemap_col = self.x // tile_size
-        return tilemap[tilemap_row][tilemap_col] == 1
+        return bottom / tile_size
+
+    def set_bottom(self, tile_y_bottom):
+        self.y = (tile_y_bottom * tile_size) - (self.height)
+
+    def tile_y_top(self):
+        return self.y / tile_size
+
+    def tile_x_left(self):
+        return self.x / tile_size
+
+    def tile_x_right(self):
+        right = self.x + self.width
+        return right / tile_size
+
+    def tile_bbox(self):
+        return (
+            self.tile_x_left(),
+            self.tile_y_top(),
+            self.tile_x_right(),
+            self.tile_y_bottom(),
+        )
+
+    def is_on_ground(self):
+        # Checks the left and right corners to see if the player is standing on the ground
+        left = self.game.level.is_in_ground(self.tile_x_left(), self.tile_y_bottom())
+        right = self.game.level.is_in_ground(self.tile_x_right(), self.tile_y_bottom())
+        return left or right
 
     def is_in_beef(self, x, y, tilemap):
         tilemap_row = y // tile_size
@@ -65,16 +93,27 @@ class Player(Drawable):
         return tilemap[tilemap_row][tilemap_col] == 2
 
     def tick(self, game):
-        # new_y = self.y + self.velocity_y
-        # if self.is_on_ground(new_y, game.level.tilemap):
-        #     self.y = new_y - (new_y % tile_size)
-        #     self.velocity_y = 0
-        # else:
-        #     self.y = new_y
+        new_y = self.y + self.velocity_y
+        new_tile_bottom_y = (new_y + self.height) / tile_size
+        would_hit_ground = self.game.level.is_in_ground(
+            self.tile_x_left(), new_tile_bottom_y
+        ) or self.game.level.is_in_ground(self.tile_x_right(), new_tile_bottom_y)
+        # Future: check self.velocity_y > 0: (Don't check floor collision if our velocity is upwards)
+        if would_hit_ground:
+            # Go to the tile above the tile we were going to end up inside of
+            if new_tile_bottom_y != floor(new_tile_bottom_y):
+                print(
+                    f"Floor collision: Would go to {new_tile_bottom_y}t ({new_y}px) but going to {floor(new_tile_bottom_y)}"
+                )
+            self.set_bottom(floor(new_tile_bottom_y))
+            self.velocity_y = 0
+        else:
+            self.y = new_y
+        # print(self.tile_y_bottom(), self.tile_x_left())
 
         self.x += self.velocity_x
         self.y += self.velocity_y
-        if not self.is_on_ground(self.y, game.level.tilemap):
+        if not self.is_on_ground():
             self.velocity_y += self.weight
         else:
             self.velocity_y = 0
@@ -94,7 +133,7 @@ class Game:
         self.window = pygame.display.set_mode(
             (self.config.WINDOW_WIDTH, self.config.WINDOW_HEIGHT)
         )
-        self.player = Player()
+        self.player = Player(game=self)
         self.drawables = [self.player]
         self.clock = pygame.time.Clock()
         self.level = Level1()
@@ -114,8 +153,8 @@ class Game:
                 elif event.key == pygame.K_d:
                     self.player.velocity_x = base_speed
                 elif event.key == pygame.K_SPACE:
-                    if self.player.is_on_ground(self.player.y, self.level.tilemap):
-                        self.player.velocity_y = -20
+                    if self.player.is_on_ground():
+                        self.player.velocity_y = -15
             elif event.type == pygame.KEYUP:
                 if event.key in [pygame.K_a, pygame.K_d]:
                     self.player.velocity_x = 0
@@ -150,7 +189,7 @@ class Level1:
         self.tilemap = [
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
             [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
@@ -179,6 +218,12 @@ class Level1:
             1: self.castle_tile,
             2: self.beef_tile,
         }
+
+    def is_in_ground(self, x, y):
+        """Take in coordinates using the tile coordinate system"""
+        tilemap_row = floor(y)
+        tilemap_col = floor(x)
+        return self.tilemap[tilemap_row][tilemap_col] == 1
 
     def draw_tilemap(self, screen):
         # Iterates through each element in the 2d array
