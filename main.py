@@ -240,6 +240,11 @@ class Level1:
 
 
 async def main():
+    import sys, platform
+
+    if sys.platform == "emscripten":
+        platform.window.canvas.style.imageRendering = "pixelated"
+
     pygame.init()
     game = Game()
     await game.run()

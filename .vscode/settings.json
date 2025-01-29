@@ -3,6 +3,7 @@
     "blit",
     "Counterspell",
     "drawables",
+    "emscripten",
     "KEYUP",
     "Mish",
     "Pygame",
