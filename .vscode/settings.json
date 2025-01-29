@@ -6,6 +6,7 @@
     "KEYUP",
     "Mish",
     "Pygame",
+    "Pygbag",
     "tickable",
     "tilemap"
   ],
