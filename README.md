@@ -20,6 +20,10 @@ A castle- and beef-themed game, made during the [Counterspell](https://countersp
 
 <video controls src="demos/Mid-Knight Snacks.mp4" title="Mid-Knight Snacks demo video"></video>
 
+## Screenshot
+
+![Screenshot of the game running on Linux](./demos/mid-knight-snacks.png)
+
 ## Building for the web
 
 Following the [Pygbag documentation](https://pygame-web.github.io/wiki/pygbag/#running-your-project-in-your-own-browser):
