@@ -3,9 +3,11 @@
     "blit",
     "Counterspell",
     "drawables",
+    "emscripten",
     "KEYUP",
     "Mish",
     "Pygame",
+    "Pygbag",
     "tickable",
     "tilemap"
   ],

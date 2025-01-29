@@ -1,5 +1,6 @@
 from __future__ import annotations
 import pygame
+import asyncio
 from math import ceil, floor
 from pathlib import Path
 
@@ -170,15 +171,16 @@ class Game:
             drawable.draw(self.window)
         pygame.display.update()
 
-    def main_loop(self):
+    async def main_loop(self):
         should_run = True
         while should_run:
             self.tick()
+            await asyncio.sleep(0)
             self.clock.tick(30)
 
-    def run(self):
+    async def run(self):
         pygame.display.set_caption("😋 Mid-knight Snacks")
-        self.main_loop()
+        await self.main_loop()
 
 
 class Level1:
@@ -237,6 +239,15 @@ class Level1:
                 screen.blit(tile_image, (col * tile_size, row * tile_size))
 
 
-pygame.init()
-game = Game()
-game.run()
+async def main():
+    import sys, platform
+
+    if sys.platform == "emscripten":
+        platform.window.canvas.style.imageRendering = "pixelated"
+
+    pygame.init()
+    game = Game()
+    await game.run()
+
+
+asyncio.run(main())
