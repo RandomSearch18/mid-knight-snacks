@@ -81,9 +81,11 @@ class Player(Drawable):
             self.tile_y_bottom(),
         )
 
-    def is_on_ground(self, tilemap):
-        # FIXME: this only check the bottom left corner for collision
-        return self.game.level.is_in_ground(self.tile_x_left(), self.tile_y_bottom())
+    def is_on_ground(self):
+        # Checks the left and right corners to see if the player is standing on the ground
+        left = self.game.level.is_in_ground(self.tile_x_left(), self.tile_y_bottom())
+        right = self.game.level.is_in_ground(self.tile_x_right(), self.tile_y_bottom())
+        return left or right
 
     def is_in_beef(self, x, y, tilemap):
         tilemap_row = y // tile_size
@@ -95,7 +97,7 @@ class Player(Drawable):
         new_tile_bottom_y = (new_y + self.height) / tile_size
         would_hit_ground = self.game.level.is_in_ground(
             self.tile_x_left(), new_tile_bottom_y
-        )
+        ) or self.game.level.is_in_ground(self.tile_x_right(), new_tile_bottom_y)
         # Future: check self.velocity_y > 0: (Don't check floor collision if our velocity is upwards)
         if would_hit_ground:
             # Go to the tile above the tile we were going to end up inside of
@@ -111,7 +113,7 @@ class Player(Drawable):
 
         self.x += self.velocity_x
         self.y += self.velocity_y
-        if not self.is_on_ground(game.level.tilemap):
+        if not self.is_on_ground():
             self.velocity_y += self.weight
         else:
             self.velocity_y = 0
@@ -151,7 +153,7 @@ class Game:
                 elif event.key == pygame.K_d:
                     self.player.velocity_x = base_speed
                 elif event.key == pygame.K_SPACE:
-                    if self.player.is_on_ground(self.level.tilemap):
+                    if self.player.is_on_ground():
                         self.player.velocity_y = -15
             elif event.type == pygame.KEYUP:
                 if event.key in [pygame.K_a, pygame.K_d]:
