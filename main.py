@@ -45,14 +45,14 @@ class Player(Drawable):
     def __init__(self, game: Game):
         self.game = game
         self.x = 50
-        self.y = 800 - (50 * 2 + 50)
+        self.y = 0  # We update this later
         self.velocity_x = 0
         self.velocity_y = 0
         self.weight = 1
         self.width = 50
         self.height = 50
         self.target_size = 50
-        # self.prev_tile_y: None | float = None
+        self.set_bottom(9)
 
     def draw(self, screen: pygame.surface.Surface):
         pygame.draw.rect(screen, (255, 0, 0), (self.x, self.y, self.width, self.height))
