@@ -163,7 +163,7 @@ class Game:
         self.player = Player(game=self)
         self.drawables = [self.player]
         self.clock = pygame.time.Clock()
-        self.level = Level1(self.tile_size)
+        self.level = Level1()
 
     def tick(self):
         # Event handling!
@@ -214,7 +214,7 @@ class Game:
 
 
 class Level1:
-    def __init__(self, tile_size):
+    def __init__(self):
         # black-ignore
         # This displays the castle tiles where a 1 is and a blank tile where 0 is
         self.tilemap = [
@@ -231,17 +231,10 @@ class Level1:
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
         ]
 
-        # Loading images
+        # Loading (un-resized) images
         self.castle_tile = pygame.image.load("assets/castle_tile.png")
         self.blank = pygame.image.load("assets/blank.jpg")
         self.beef_tile = pygame.image.load("assets/beef_tile.png")
-
-        # Resizing images
-        self.castle_tile = pygame.transform.scale(
-            self.castle_tile, (tile_size, tile_size)
-        )
-        self.blank = pygame.transform.scale(self.blank, (tile_size, tile_size))
-        self.beef_tile = pygame.transform.scale(self.beef_tile, (tile_size, tile_size))
 
         # A dictionary to link the numbers to the image files
         self.tile_images = {
@@ -271,13 +264,19 @@ class Level1:
         return self.tile_at(tilemap_x, tilemap_y) == 1
 
     def draw_tilemap(self, screen, tile_size):
+        # Resize tile image to match the tile size
+        resized_tiles = {
+            id: pygame.transform.scale(image, (tile_size, tile_size))
+            for id, image in self.tile_images.items()
+        }
+
         # Iterates through each element in the 2d array
         for row in range(len(self.tilemap)):
             for col in range(len(self.tilemap[row])):
                 # Finds the tile type at a position (1 or 0)
                 tile_type = self.tilemap[row][col]
                 # Matches it with the image using the dictionary
-                tile_image = self.tile_images[tile_type]
+                tile_image = resized_tiles[tile_type]
                 # Displays them in order using their position in the array and size
                 screen.blit(tile_image, (col * tile_size, row * tile_size))
 
