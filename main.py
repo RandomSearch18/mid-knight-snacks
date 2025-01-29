@@ -11,7 +11,7 @@ tile_size = 64
 
 class GameConfig:
     WINDOW_WIDTH = 1000
-    WINDOW_HEIGHT = 800
+    WINDOW_HEIGHT = 704
 
 
 class Drawable:
@@ -158,7 +158,7 @@ class Game:
         self.should_run = True
         self.config = GameConfig()
         self.window = pygame.display.set_mode(
-            (self.config.WINDOW_WIDTH, self.config.WINDOW_HEIGHT)
+            (self.config.WINDOW_WIDTH, self.config.WINDOW_HEIGHT), pygame.RESIZABLE
         )
         self.player = Player(game=self)
         self.drawables = [self.player]
