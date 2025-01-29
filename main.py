@@ -51,6 +51,14 @@ class Player(Drawable):
         self.height = self.target_height / 2
         self.set_bottom(7.5)
 
+    def spawn(self):
+        self.target_width = 40
+        self.target_height = 60
+        self.width = self.target_width / 2
+        self.height = self.target_height / 2
+        self.x = 50
+        self.set_bottom(7.5)
+
     def draw(self, screen: pygame.surface.Surface):
         pygame.draw.rect(
             screen,
@@ -100,6 +108,8 @@ class Player(Drawable):
         return level.tile_at(tilemap_col, tilemap_row) == 2
 
     def tick(self, game):
+        # PHYSICS
+        # CHecking for collision with a solid tile (for y_velocity)
         new_y = self.y + self.velocity_y
         new_tile_bottom_y = (new_y + self.height) / tile_size
         would_hit_ground = self.game.level.is_in_ground(
@@ -116,18 +126,25 @@ class Player(Drawable):
             self.velocity_y = 0
         else:
             self.y = new_y
-        # print(self.tile_y_bottom(), self.tile_x_left())
-
+        # Updating position based on velocity
         self.x += self.velocity_x
         self.y += self.velocity_y
         if not self.is_on_ground():
+            # Acceleration due to gravity
             self.velocity_y += self.weight
         else:
+            # Reset velocity if we have hit the ground
             self.velocity_y = 0
 
+        # GAME LOGIC
         if self.is_in_beef(self.x, self.y, game.level):
             self.target_width = 120
             self.target_height = 150
+        if self.tile_y_bottom() >= len(game.level.tilemap) - 1:
+            # We've fallen out of the world. Respawn!
+            print("You fell out of the world :(")
+            self.spawn()
+            return
 
         size_increase_rate = 3
         if self.width < self.target_width:
