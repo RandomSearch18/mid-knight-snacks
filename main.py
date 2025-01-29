@@ -1,4 +1,5 @@
 from __future__ import annotations
+import sys
 import pygame
 import asyncio
 from math import ceil, floor
@@ -6,11 +7,6 @@ from pathlib import Path
 
 
 tile_size = 64
-
-# Music stuff
-pygame.mixer.init()
-pygame.mixer.music.load("assets/music.mp3")
-pygame.mixer.music.play(-1)  # infinitely loops over music
 
 
 class GameConfig:
@@ -49,13 +45,21 @@ class Player(Drawable):
         self.velocity_x = 0
         self.velocity_y = 0
         self.weight = 1
-        self.width = 50
-        self.height = 50
-        self.target_size = 50
-        self.set_bottom(9)
+        self.target_width = 40
+        self.target_height = 60
+        self.width = self.target_width / 2
+        self.height = self.target_height / 2
+        self.set_bottom(7.5)
 
     def draw(self, screen: pygame.surface.Surface):
-        pygame.draw.rect(screen, (255, 0, 0), (self.x, self.y, self.width, self.height))
+        pygame.draw.rect(
+            screen,
+            "#425162",
+            (self.x, self.y, self.width, self.height),
+            border_radius=3,
+            border_top_left_radius=30,
+            border_top_right_radius=30,
+        )
 
     def tile_y_bottom(self):
         bottom = self.y + self.height
@@ -89,8 +93,10 @@ class Player(Drawable):
         return left or right
 
     def is_in_beef(self, x, y, tilemap):
-        tilemap_row = y // tile_size
-        tilemap_col = x // tile_size
+        # FIXME: Obviously not a proper collision check,
+        # but bottom right corner will work fine most of the time
+        tilemap_row = floor(self.tile_y_bottom())
+        tilemap_col = floor(self.tile_x_left())
         return tilemap[tilemap_row][tilemap_col] == 2
 
     def tick(self, game):
@@ -99,12 +105,12 @@ class Player(Drawable):
         would_hit_ground = self.game.level.is_in_ground(
             self.tile_x_left(), new_tile_bottom_y
         ) or self.game.level.is_in_ground(self.tile_x_right(), new_tile_bottom_y)
-        # Future: check self.velocity_y > 0: (Don't check floor collision if our velocity is upwards)
+        # Idea: check self.velocity_y > 0: (Don't check floor collision if our velocity is upwards)
         if would_hit_ground:
             # Go to the tile above the tile we were going to end up inside of
             if new_tile_bottom_y != floor(new_tile_bottom_y):
                 print(
-                    f"Floor collision: Would go to {new_tile_bottom_y}t ({new_y}px) but going to {floor(new_tile_bottom_y)}"
+                    f"Floor collision: Would go to {new_tile_bottom_y}t ({new_y}px) but going to {floor(new_tile_bottom_y)}t"
                 )
             self.set_bottom(floor(new_tile_bottom_y))
             self.velocity_y = 0
@@ -120,16 +126,19 @@ class Player(Drawable):
             self.velocity_y = 0
 
         if self.is_in_beef(self.x, self.y, game.level.tilemap):
-            self.target_size = 200
+            self.target_width = 120
+            self.target_height = 150
 
         size_increase_rate = 3
-        if self.width < self.target_size:
+        if self.width < self.target_width:
             self.width += size_increase_rate
+        if self.height < self.target_height:
             self.height += size_increase_rate
 
 
 class Game:
     def __init__(self):
+        self.should_run = True
         self.config = GameConfig()
         self.window = pygame.display.set_mode(
             (self.config.WINDOW_WIDTH, self.config.WINDOW_HEIGHT)
@@ -144,10 +153,12 @@ class Game:
         for event in pygame.event.get():
             base_speed = 5
             if event.type == pygame.QUIT:
-                running = False
-                pygame.quit()
+                print("Exiting...")
                 pygame.mixer.music.stop()
-                # sys.exit()
+                pygame.quit()
+                self.should_run = False
+                sys.exit()  # Because I got fed up with the program taking a while to exit
+                return
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_a:
                     self.player.velocity_x = -base_speed
@@ -172,14 +183,16 @@ class Game:
         pygame.display.update()
 
     async def main_loop(self):
-        should_run = True
-        while should_run:
+        while self.should_run:
             self.tick()
             await asyncio.sleep(0)
             self.clock.tick(30)
 
     async def run(self):
         pygame.display.set_caption("😋 Mid-knight Snacks")
+        # Music stuff
+        pygame.mixer.music.load("assets/music.mp3")
+        pygame.mixer.music.play(-1)  # infinitely loops over music
         await self.main_loop()
 
 
