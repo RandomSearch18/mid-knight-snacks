@@ -92,16 +92,22 @@ class Player(Drawable):
 
     def tick(self, game):
         new_y = self.y + self.velocity_y
-        new_tile_y = new_y / tile_size
-        would_hit_ground = self.game.level.is_in_ground(self.tile_x_left(), new_tile_y)
-        if would_hit_ground and self.velocity_y != 0:
+        new_tile_bottom_y = (new_y + self.height) / tile_size
+        would_hit_ground = self.game.level.is_in_ground(
+            self.tile_x_left(), new_tile_bottom_y
+        )
+        if would_hit_ground:
             # Go to the tile above the tile we were going to end up inside of
             print(
-                f"Would go to {new_tile_y}t ({new_y}px) but going to {new_y - (new_y % tile_size)}px"
+                f"Floor collision: Would go to {new_tile_bottom_y}t ({new_y}px) but going to {floor(new_tile_bottom_y)}"
             )
-            self.set_bottom(floor(new_tile_y))
+            self.set_bottom(floor(new_tile_bottom_y))
             self.velocity_y = 0
         else:
+            print(
+                f"{new_y}",
+                self.game.level.is_in_ground(self.tile_x_left(), new_tile_bottom_y),
+            )
             self.y = new_y
         # print(self.tile_y_bottom(), self.tile_x_left())
 
@@ -148,7 +154,7 @@ class Game:
                     self.player.velocity_x = base_speed
                 elif event.key == pygame.K_SPACE:
                     if self.player.is_on_ground(self.level.tilemap):
-                        self.player.velocity_y = -20
+                        self.player.velocity_y = -15
             elif event.type == pygame.KEYUP:
                 if event.key in [pygame.K_a, pygame.K_d]:
                     self.player.velocity_x = 0
