@@ -5,7 +5,7 @@ import asyncio
 from math import ceil, floor
 from pathlib import Path
 
-
+GAME_TITLE = "😋 Mid-knight Snacks"
 tile_size = 64
 
 
@@ -92,12 +92,12 @@ class Player(Drawable):
         right = self.game.level.is_in_ground(self.tile_x_right(), self.tile_y_bottom())
         return left or right
 
-    def is_in_beef(self, x, y, tilemap):
+    def is_in_beef(self, x, y, level: Level1):
         # FIXME: Obviously not a proper collision check,
         # but bottom right corner will work fine most of the time
         tilemap_row = floor(self.tile_y_bottom())
         tilemap_col = floor(self.tile_x_left())
-        return tilemap[tilemap_row][tilemap_col] == 2
+        return level.tile_at(tilemap_col, tilemap_row) == 2
 
     def tick(self, game):
         new_y = self.y + self.velocity_y
@@ -125,7 +125,7 @@ class Player(Drawable):
         else:
             self.velocity_y = 0
 
-        if self.is_in_beef(self.x, self.y, game.level.tilemap):
+        if self.is_in_beef(self.x, self.y, game.level):
             self.target_width = 120
             self.target_height = 150
 
@@ -189,7 +189,7 @@ class Game:
             self.clock.tick(30)
 
     async def run(self):
-        pygame.display.set_caption("😋 Mid-knight Snacks")
+        pygame.display.set_caption(GAME_TITLE)
         # Music stuff
         pygame.mixer.music.load("assets/music.mp3")
         pygame.mixer.music.play(-1)  # infinitely loops over music
@@ -234,11 +234,25 @@ class Level1:
             2: self.beef_tile,
         }
 
-    def is_in_ground(self, x, y):
-        """Take in coordinates using the tile coordinate system"""
+    def tile_at(self, x: float, y: float):
+        """Gets a tile at a specified (tile) coordinate
+
+        - If the tile is out of bounds, returns 0 (blank)
+        - If a coordinate is a float, it will be floored
+        """
         tilemap_row = floor(y)
         tilemap_col = floor(x)
-        return self.tilemap[tilemap_row][tilemap_col] == 1
+        if tilemap_row < 0 or tilemap_row >= len(self.tilemap):
+            return 0
+        if tilemap_col < 0 or tilemap_col >= len(self.tilemap[tilemap_row]):
+            return 0
+        return self.tilemap[tilemap_row][tilemap_col]
+
+    def is_in_ground(self, x, y):
+        """Accepts x, y coordinates using the tile coordinate system"""
+        tilemap_x = floor(x)
+        tilemap_y = floor(y)
+        return self.tile_at(tilemap_x, tilemap_y) == 1
 
     def draw_tilemap(self, screen):
         # Iterates through each element in the 2d array
@@ -256,6 +270,7 @@ async def main():
     import sys, platform
 
     if sys.platform == "emscripten":
+        platform.window.title = GAME_TITLE
         platform.window.canvas.style.imageRendering = "pixelated"
 
     pygame.init()
