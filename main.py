@@ -6,7 +6,6 @@ from math import ceil, floor
 from pathlib import Path
 
 GAME_TITLE = "😋 Mid-knight Snacks"
-tile_size = 64
 
 
 class GameConfig:
@@ -71,20 +70,20 @@ class Player(Drawable):
 
     def tile_y_bottom(self):
         bottom = self.y + self.height
-        return bottom / tile_size
+        return bottom / self.game.tile_size
 
     def set_bottom(self, tile_y_bottom):
-        self.y = (tile_y_bottom * tile_size) - (self.height)
+        self.y = (tile_y_bottom * self.game.tile_size) - (self.height)
 
     def tile_y_top(self):
-        return self.y / tile_size
+        return self.y / self.game.tile_size
 
     def tile_x_left(self):
-        return self.x / tile_size
+        return self.x / self.game.tile_size
 
     def tile_x_right(self):
         right = self.x + self.width
-        return right / tile_size
+        return right / self.game.tile_size
 
     def tile_bbox(self):
         return (
@@ -111,7 +110,7 @@ class Player(Drawable):
         # PHYSICS
         # CHecking for collision with a solid tile (for y_velocity)
         new_y = self.y + self.velocity_y
-        new_tile_bottom_y = (new_y + self.height) / tile_size
+        new_tile_bottom_y = (new_y + self.height) / self.game.tile_size
         would_hit_ground = self.game.level.is_in_ground(
             self.tile_x_left(), new_tile_bottom_y
         ) or self.game.level.is_in_ground(self.tile_x_right(), new_tile_bottom_y)
@@ -157,13 +156,14 @@ class Game:
     def __init__(self):
         self.should_run = True
         self.config = GameConfig()
+        self.tile_size = 64
         self.window = pygame.display.set_mode(
             (self.config.WINDOW_WIDTH, self.config.WINDOW_HEIGHT), pygame.RESIZABLE
         )
         self.player = Player(game=self)
         self.drawables = [self.player]
         self.clock = pygame.time.Clock()
-        self.level = Level1()
+        self.level = Level1(self.tile_size)
 
     def tick(self):
         # Event handling!
@@ -194,7 +194,7 @@ class Game:
             tickable.tick(self)
 
         # Update the screen!
-        self.level.draw_tilemap(self.window)
+        self.level.draw_tilemap(self.window, self.tile_size)
         for drawable in self.drawables:
             drawable.draw(self.window)
         pygame.display.update()
@@ -214,9 +214,8 @@ class Game:
 
 
 class Level1:
-    def __init__(self):
+    def __init__(self, tile_size):
         # black-ignore
-
         # This displays the castle tiles where a 1 is and a blank tile where 0 is
         self.tilemap = [
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -271,7 +270,7 @@ class Level1:
         tilemap_y = floor(y)
         return self.tile_at(tilemap_x, tilemap_y) == 1
 
-    def draw_tilemap(self, screen):
+    def draw_tilemap(self, screen, tile_size):
         # Iterates through each element in the 2d array
         for row in range(len(self.tilemap)):
             for col in range(len(self.tilemap[row])):
