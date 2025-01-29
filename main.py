@@ -39,51 +39,58 @@ class GameBackground(Drawable):
 class Player(Drawable):
     def __init__(self, game: Game):
         self.game = game
-        self.x = 50
-        self.y = 0  # We update this later
+        # We initialise most values to 0, because they will be set when we call spawn()
+        self.x = 0
+        self.y = 0
         self.velocity_x = 0
         self.velocity_y = 0
         self.weight = 1
-        self.target_width = 40
-        self.target_height = 60
-        self.width = self.target_width / 2
-        self.height = self.target_height / 2
-        self.set_bottom(7.5)
+        # Width and height are measured in tiles
+        self.target_width = 0
+        self.target_height = 0
+        self.width = 0
+        self.height = 0
+        self.spawn()
 
     def spawn(self):
-        self.target_width = 40
-        self.target_height = 60
+        # Width and height are measured in tiles
+        self.target_width = 0.625  # 40px @ 64x
+        self.target_height = 0.9375  # 60px @ 64x
+        # Start off at half size so that there's a fun animation when we spawn in
         self.width = self.target_width / 2
         self.height = self.target_height / 2
-        self.x = 50
+        self.set_left(1.5)
         self.set_bottom(7.5)
 
     def draw(self, screen: pygame.surface.Surface):
+        width_px = self.width * self.game.tile_size
+        height_px = self.height * self.game.tile_size
         pygame.draw.rect(
             screen,
             "#425162",
-            (self.x, self.y, self.width, self.height),
+            (self.x, self.y, width_px, height_px),
             border_radius=3,
             border_top_left_radius=30,
             border_top_right_radius=30,
         )
 
-    def tile_y_bottom(self):
-        bottom = self.y + self.height
-        return bottom / self.game.tile_size
-
-    def set_bottom(self, tile_y_bottom):
-        self.y = (tile_y_bottom * self.game.tile_size) - (self.height)
-
     def tile_y_top(self):
         return self.y / self.game.tile_size
+
+    def tile_y_bottom(self):
+        return self.tile_y_top() + self.height
 
     def tile_x_left(self):
         return self.x / self.game.tile_size
 
     def tile_x_right(self):
-        right = self.x + self.width
-        return right / self.game.tile_size
+        return self.tile_x_left() + self.width
+
+    def set_bottom(self, tile_y_bottom):
+        self.y = (tile_y_bottom - self.height) * self.game.tile_size
+
+    def set_left(self, tile_x_left):
+        self.x = tile_x_left * self.game.tile_size
 
     def tile_bbox(self):
         return (
@@ -106,11 +113,11 @@ class Player(Drawable):
         tilemap_col = floor(self.tile_x_left())
         return level.tile_at(tilemap_col, tilemap_row) == 2
 
-    def tick(self, game):
+    def tick(self):
         # PHYSICS
         # CHecking for collision with a solid tile (for y_velocity)
         new_y = self.y + self.velocity_y
-        new_tile_bottom_y = (new_y + self.height) / self.game.tile_size
+        new_tile_bottom_y = (new_y / self.game.tile_size) + self.height
         would_hit_ground = self.game.level.is_in_ground(
             self.tile_x_left(), new_tile_bottom_y
         ) or self.game.level.is_in_ground(self.tile_x_right(), new_tile_bottom_y)
@@ -136,16 +143,16 @@ class Player(Drawable):
             self.velocity_y = 0
 
         # GAME LOGIC
-        if self.is_in_beef(self.x, self.y, game.level):
-            self.target_width = 120
-            self.target_height = 150
-        if self.tile_y_bottom() >= len(game.level.tilemap) - 1:
+        if self.is_in_beef(self.x, self.y, self.game.level):
+            self.target_width = 1.875  # 120px @ 64x
+            self.target_height = 2.34375  # 150px @ 64x
+        if self.tile_y_bottom() >= len(self.game.level.tilemap) - 1:
             # We've fallen out of the world. Respawn!
             print("You fell out of the world :(")
             self.spawn()
             return
 
-        size_increase_rate = 3
+        size_increase_rate = 0.05  # unit: tiles per frame
         if self.width < self.target_width:
             self.width += size_increase_rate
         if self.height < self.target_height:
@@ -191,7 +198,7 @@ class Game:
         # Update data!
         to_tick = [self.player]
         for tickable in to_tick:
-            tickable.tick(self)
+            tickable.tick()
 
         # Update the screen!
         self.level.draw_tilemap(self.window, self.tile_size)
@@ -265,6 +272,7 @@ class Level1:
 
     def draw_tilemap(self, screen, tile_size):
         # Resize tile image to match the tile size
+        # Idea: Cache these in memory (per tile_size) so that we're not resizing images every frame
         resized_tiles = {
             id: pygame.transform.scale(image, (tile_size, tile_size))
             for id, image in self.tile_images.items()
