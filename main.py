@@ -60,6 +60,9 @@ class Player(Drawable):
         bottom = self.y + self.height
         return bottom / tile_size
 
+    def set_bottom(self, tile_y_bottom):
+        self.y = (tile_y_bottom * tile_size) - (self.height)
+
     def tile_y_top(self):
         return self.y / tile_size
 
@@ -89,13 +92,18 @@ class Player(Drawable):
 
     def tick(self, game):
         new_y = self.y + self.velocity_y
-        would_hit_ground = 1  # TODO
-        # if self.is_on_ground(new_y, game.level.tilemap):
-        #     self.y = new_y - (new_y % tile_size)
-        #     self.velocity_y = 0
-        # else:
-        #     self.y = new_y
-        print(self.tile_y_bottom(), self.tile_x_left())
+        new_tile_y = new_y / tile_size
+        would_hit_ground = self.game.level.is_in_ground(self.tile_x_left(), new_tile_y)
+        if would_hit_ground and self.velocity_y != 0:
+            # Go to the tile above the tile we were going to end up inside of
+            print(
+                f"Would go to {new_tile_y}t ({new_y}px) but going to {new_y - (new_y % tile_size)}px"
+            )
+            self.set_bottom(floor(new_tile_y))
+            self.velocity_y = 0
+        else:
+            self.y = new_y
+        # print(self.tile_y_bottom(), self.tile_x_left())
 
         self.x += self.velocity_x
         self.y += self.velocity_y
