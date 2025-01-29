@@ -49,11 +49,26 @@ class Player(Drawable):
         self.width = 50
         self.height = 50
         self.target_size = 50
+        # self.prev_tile_y: None | float = None
 
     def draw(self, screen: pygame.surface.Surface):
         pygame.draw.rect(screen, (255, 0, 0), (self.x, self.y, self.width, self.height))
 
-    def is_on_ground(self, y, tilemap):
+    def tile_y_bottom(self):
+        bottom = self.y + self.height
+        return bottom / tile_size
+
+    def tile_y_top(self):
+        return self.y / tile_size
+
+    def tile_x_left(self):
+        return self.x / tile_size
+
+    def tile_x_right(self):
+        right = self.x + self.width
+        return right / tile_size
+
+    def is_on_ground(self, tilemap):
         bottom = self.y + self.height
         tilemap_row = bottom // tile_size
         tilemap_col = self.x // tile_size
@@ -71,10 +86,11 @@ class Player(Drawable):
         #     self.velocity_y = 0
         # else:
         #     self.y = new_y
+        print(self.tile_y_bottom(), self.tile_x_left())
 
         self.x += self.velocity_x
         self.y += self.velocity_y
-        if not self.is_on_ground(self.y, game.level.tilemap):
+        if not self.is_on_ground(game.level.tilemap):
             self.velocity_y += self.weight
         else:
             self.velocity_y = 0
@@ -114,7 +130,7 @@ class Game:
                 elif event.key == pygame.K_d:
                     self.player.velocity_x = base_speed
                 elif event.key == pygame.K_SPACE:
-                    if self.player.is_on_ground(self.player.y, self.level.tilemap):
+                    if self.player.is_on_ground(self.level.tilemap):
                         self.player.velocity_y = -20
             elif event.type == pygame.KEYUP:
                 if event.key in [pygame.K_a, pygame.K_d]:
@@ -148,13 +164,13 @@ class Level1:
 
         # This displays the castle tiles where a 1 is and a blank tile where 0 is
         self.tilemap = [
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
             [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0],
+            [1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],

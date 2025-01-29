@@ -1,4 +1,13 @@
 {
-  "cSpell.words": ["blit", "Counterspell", "drawables", "Mish", "Pygame"],
+  "cSpell.words": [
+    "blit",
+    "Counterspell",
+    "drawables",
+    "KEYUP",
+    "Mish",
+    "Pygame",
+    "tickable",
+    "tilemap"
+  ],
   "python.analysis.typeCheckingMode": "standard"
 }
