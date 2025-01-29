@@ -96,18 +96,16 @@ class Player(Drawable):
         would_hit_ground = self.game.level.is_in_ground(
             self.tile_x_left(), new_tile_bottom_y
         )
+        # Future: check self.velocity_y > 0: (Don't check floor collision if our velocity is upwards)
         if would_hit_ground:
             # Go to the tile above the tile we were going to end up inside of
-            print(
-                f"Floor collision: Would go to {new_tile_bottom_y}t ({new_y}px) but going to {floor(new_tile_bottom_y)}"
-            )
+            if new_tile_bottom_y != floor(new_tile_bottom_y):
+                print(
+                    f"Floor collision: Would go to {new_tile_bottom_y}t ({new_y}px) but going to {floor(new_tile_bottom_y)}"
+                )
             self.set_bottom(floor(new_tile_bottom_y))
             self.velocity_y = 0
         else:
-            print(
-                f"{new_y}",
-                self.game.level.is_in_ground(self.tile_x_left(), new_tile_bottom_y),
-            )
             self.y = new_y
         # print(self.tile_y_bottom(), self.tile_x_left())
 
