@@ -9,10 +9,26 @@ A castle- and beef-themed game, made during the [Counterspell](https://countersp
 
 ## How to run the game
 
+### Play it online
+
+Visit **[https://randomsearch18.github.io/mid-knight-snacks](https://randomsearch18.github.io/mid-knight-snacks/)** to play the game in your browser! Keyboard required.
+
+Alternative domain coming soon, maybe.
+
+### Run it locally
+
 1. Clone the repository
 2. Create a venv if you want (`python3 -m venv .venv` and `source .venv/bin/activate`)
 3. Install Pygame with `python3 -m pip install -r requirements.txt`
 4. `python3 main.py`
+
+## Instructions and lore
+
+Move with <kbd>A</kbd> and <kbd>D</kbd> and use <kbd>Space</kbd> to jump.
+
+You are a very hungry knight in a castle, and you've got to navigate the castle to find the beef that you crave. You know you've won when you become nice and... chubby.
+
+The original idea behind the game was that by completing levels, the player would get larger and more unwieldy, thus making the player their own enemy.
 
 ## Demo video
 
@@ -23,6 +39,16 @@ A castle- and beef-themed game, made during the [Counterspell](https://countersp
 ## Screenshot
 
 ![Screenshot of the game running on Linux](./demos/mid-knight-snacks.png)
+
+## System requirements
+
+These are the requirements for running the game locally:
+
+- A screen. (At least 1000x800 because the window isn't resizable)
+- Windows, Linux, or MacOS
+  - Fun fact: during the game jam, we used Windows and MacOS, and further development was done with Linux
+- You need a keyboard! Or something that can provide inputs for <kbd>A</kbd>, <kbd>D</kbd>, and <kbd>Space</kbd>
+- A modern version of Python. You can probably go down to maybe 3.8, but that hasn't been specifically tested
 
 ## Building for the web
 
