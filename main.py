@@ -1,5 +1,6 @@
+from __future__ import annotations
 import pygame
-from math import ceil
+from math import ceil, floor
 from pathlib import Path
 
 
@@ -40,7 +41,8 @@ class GameBackground(Drawable):
 
 
 class Player(Drawable):
-    def __init__(self):
+    def __init__(self, game: Game):
+        self.game = game
         self.x = 50
         self.y = 800 - (50 * 2 + 50)
         self.velocity_x = 0
@@ -68,11 +70,17 @@ class Player(Drawable):
         right = self.x + self.width
         return right / tile_size
 
+    def tile_bbox(self):
+        return (
+            self.tile_x_left(),
+            self.tile_y_top(),
+            self.tile_x_right(),
+            self.tile_y_bottom(),
+        )
+
     def is_on_ground(self, tilemap):
-        bottom = self.y + self.height
-        tilemap_row = bottom // tile_size
-        tilemap_col = self.x // tile_size
-        return tilemap[tilemap_row][tilemap_col] == 1
+        # FIXME: this only check the bottom left corner for collision
+        return self.game.level.is_in_ground(self.tile_x_left(), self.tile_y_bottom())
 
     def is_in_beef(self, x, y, tilemap):
         tilemap_row = y // tile_size
@@ -80,7 +88,8 @@ class Player(Drawable):
         return tilemap[tilemap_row][tilemap_col] == 2
 
     def tick(self, game):
-        # new_y = self.y + self.velocity_y
+        new_y = self.y + self.velocity_y
+        would_hit_ground = 1  # TODO
         # if self.is_on_ground(new_y, game.level.tilemap):
         #     self.y = new_y - (new_y % tile_size)
         #     self.velocity_y = 0
@@ -110,7 +119,7 @@ class Game:
         self.window = pygame.display.set_mode(
             (self.config.WINDOW_WIDTH, self.config.WINDOW_HEIGHT)
         )
-        self.player = Player()
+        self.player = Player(game=self)
         self.drawables = [self.player]
         self.clock = pygame.time.Clock()
         self.level = Level1()
@@ -195,6 +204,12 @@ class Level1:
             1: self.castle_tile,
             2: self.beef_tile,
         }
+
+    def is_in_ground(self, x, y):
+        """Take in coordinates using the tile coordinate system"""
+        tilemap_row = floor(y)
+        tilemap_col = floor(x)
+        return self.tilemap[tilemap_row][tilemap_col] == 1
 
     def draw_tilemap(self, screen):
         # Iterates through each element in the 2d array
