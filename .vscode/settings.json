@@ -10,7 +10,8 @@
     "Pygbag",
     "Respawn",
     "tickable",
-    "tilemap"
+    "tilemap",
+    "VIDEORESIZE"
   ],
   "python.analysis.typeCheckingMode": "standard"
 }

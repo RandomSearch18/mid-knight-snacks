@@ -30,15 +30,16 @@ You are a very hungry knight in a castle, and you've got to navigate the castle 
 
 The original idea behind the game was that by completing levels, the player would get larger and more unwieldy, thus making the player their own enemy.
 
-## Demo video
-
-[Download or view the video (1.5 MB, mp4)](./demos/Mid-Knight%20Snacks.mp4)
-
-<video controls src="demos/Mid-Knight Snacks.mp4" title="Mid-Knight Snacks demo video"></video>
-
-## Screenshot
+## Screenshots
 
 ![Screenshot of the game running on Linux](./demos/mid-knight-snacks.png)
+![Screenshot of the game in a smaller window, showing how it can automatically resize](./demos/auto-resizing.png)
+
+## Demo video
+
+You can [download or view the demo video (1.5 MB, mp4)](./demos/Mid-Knight%20Snacks.mp4). It shows the game in the state it was in at the end the Counterspell game jam.
+
+<video controls src="demos/Mid-Knight Snacks.mp4" title="Mid-Knight Snacks demo video"></video>
 
 ## System requirements
 
