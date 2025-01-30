@@ -289,19 +289,26 @@ class Level1:
         # Resize tile image to match the tile size
         # Idea: Cache these in memory (per tile_size) so that we're not resizing images every frame
         resized_tiles = {
-            id: pygame.transform.scale(image, (tile_size, tile_size))
-            for id, image in self.tile_images.items()
+            type: pygame.transform.scale(image, (tile_size, tile_size))
+            for type, image in self.tile_images.items()
         }
+
+        # Start from a position such that the game will be centred
+        current_y = 0
+        initial_x = 0
 
         # Iterates through each element in the 2d array
         for row in range(len(self.tilemap)):
+            current_x = initial_x
             for col in range(len(self.tilemap[row])):
-                # Finds the tile type at a position (1 or 0)
+                # Finds the tile type at a position
                 tile_type = self.tilemap[row][col]
                 # Matches it with the image using the dictionary
                 tile_image = resized_tiles[tile_type]
-                # Displays them in order using their position in the array and size
-                screen.blit(tile_image, (col * tile_size, row * tile_size))
+                # Displays them in order using the current x and y positions
+                screen.blit(tile_image, (current_x, current_y))
+                current_x += tile_size
+            current_y += tile_size
 
 
 async def main():
