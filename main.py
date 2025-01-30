@@ -62,7 +62,7 @@ class Player(Drawable):
         self.set_left(1.5)
         self.set_bottom(7.5)
 
-    def draw(self, screen: pygame.surface.Surface):
+    def draw(self, screen: pygame.Surface):
         width_px = self.width * self.game.tile_size
         height_px = self.height * self.game.tile_size
         pygame.draw.rect(
@@ -146,7 +146,7 @@ class Player(Drawable):
         if self.is_in_beef(self.x, self.y, self.game.level):
             self.target_width = 1.875  # 120px @ 64x
             self.target_height = 2.34375  # 150px @ 64x
-        if self.tile_y_bottom() >= len(self.game.level.tilemap) - 1:
+        if self.tile_y_bottom() >= self.game.level.row_count() - 1:
             # We've fallen out of the world. Respawn!
             print("You fell out of the world :(")
             self.spawn()
@@ -172,11 +172,17 @@ class Game:
         self.drawables = [self.player]
         self.clock = pygame.time.Clock()
         self.level = Level1()
+        self.game_area = pygame.Surface(
+            (
+                self.level.row_count() * self.tile_size,
+                self.level.col_count() * self.tile_size,
+            )
+        )
 
     def calculate_best_tile_size(self):
         # Work out how many big a tile would be if the level were to fit perfectly on the screen
-        tiles_horizontal = len(self.level.tilemap[0])
-        tiles_vertical = len(self.level.tilemap)
+        tiles_horizontal = self.level.row_count()
+        tiles_vertical = self.level.col_count()
         window_width, window_height = self.window.get_size()
         max_tile_width = window_width / tiles_horizontal
         max_tile_height = window_height / tiles_vertical
@@ -268,6 +274,12 @@ class Level1:
             2: self.beef_tile,
         }
 
+    def row_count(self):
+        return len(self.tilemap[0])
+
+    def col_count(self):
+        return len(self.tilemap)
+
     def tile_at(self, x: float, y: float):
         """Gets a tile at a specified (tile) coordinate
 
@@ -276,9 +288,9 @@ class Level1:
         """
         tilemap_row = floor(y)
         tilemap_col = floor(x)
-        if tilemap_row < 0 or tilemap_row >= len(self.tilemap):
+        if tilemap_row < 0 or tilemap_row >= self.col_count():
             return 0
-        if tilemap_col < 0 or tilemap_col >= len(self.tilemap[tilemap_row]):
+        if tilemap_col < 0 or tilemap_col >= self.row_count():
             return 0
         return self.tilemap[tilemap_row][tilemap_col]
 
@@ -297,8 +309,8 @@ class Level1:
         }
 
         # Start from a position such that the game will be centred
-        level_height_px = len(self.tilemap) * tile_size
-        level_width_px = len(self.tilemap[0]) * tile_size
+        level_height_px = self.col_count() * tile_size
+        level_width_px = self.row_count() * tile_size
         current_y = floor((screen.get_height() - level_height_px) / 2)
         initial_x = floor((screen.get_width() - level_width_px) / 2)
 
