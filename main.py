@@ -2,15 +2,15 @@ from __future__ import annotations
 import sys
 import pygame
 import asyncio
-from math import ceil, floor
+from math import ceil, floor, log2
 from pathlib import Path
 
 GAME_TITLE = "😋 Mid-knight Snacks"
 
 
 class GameConfig:
-    WINDOW_WIDTH = 1000
-    WINDOW_HEIGHT = 704
+    WINDOW_WIDTH = 64 * 17
+    WINDOW_HEIGHT = 64 * 11
 
 
 class Drawable:
@@ -172,6 +172,19 @@ class Game:
         self.clock = pygame.time.Clock()
         self.level = Level1()
 
+    def calculate_best_tile_size(self):
+        # Work out how many big a tile would be if the level were to fit perfectly on the screen
+        tiles_horizontal = len(self.level.tilemap[0])
+        tiles_vertical = len(self.level.tilemap)
+        window_width, window_height = self.window.get_size()
+        max_tile_width = window_width / tiles_horizontal
+        max_tile_height = window_height / tiles_vertical
+        # Use the shorter of the two lengths so that we know the level will fit on the screen in both dimensions
+        max_tile_length = min(max_tile_width, max_tile_height)
+        # Work out the nearest power of 2 that's less than the max tile length
+        log_len = log2(max_tile_length)
+        return 2 ** floor(log_len)
+
     def tick(self):
         # Event handling!
         for event in pygame.event.get():
@@ -183,6 +196,8 @@ class Game:
                 self.should_run = False
                 sys.exit()  # Because I got fed up with the program taking a while to exit
                 return
+            elif event.type == pygame.VIDEORESIZE:
+                self.tile_size = self.calculate_best_tile_size()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_a:
                     self.player.velocity_x = -base_speed
