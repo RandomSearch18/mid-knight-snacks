@@ -40,16 +40,18 @@ class Player(Drawable):
     def __init__(self, game: Game):
         self.game = game
         # We initialise most values to 0, because they will be set when we call spawn()
-        self.x = 0
-        self.y = 0
-        self.velocity_x = 0
-        self.velocity_y = 0
-        self.weight = 1
-        # Width and height are measured in tiles
-        self.target_width = 0
-        self.target_height = 0
-        self.width = 0
-        self.height = 0
+        # Position, width and height are measured in tiles
+        self.x = 0.0
+        self.y = 0.0
+        self.target_width = 0.0
+        self.target_height = 0.0
+        self.width = 0.0
+        self.height = 0.0
+        # Velocity is measured in tiles per frame
+        self.velocity_x = 0.0
+        self.velocity_y = 0.0
+        # Acceleration due to gravity, measured in tiles per frame^2
+        self.gravity = 1 / 64
         self.spawn()
 
     def spawn(self):
@@ -65,32 +67,34 @@ class Player(Drawable):
     def draw(self, screen: pygame.Surface):
         width_px = self.width * self.game.tile_size
         height_px = self.height * self.game.tile_size
+        x_px = self.x * self.game.tile_size
+        y_px = self.y * self.game.tile_size
         pygame.draw.rect(
             screen,
             "#425162",
-            (self.x, self.y, width_px, height_px),
+            (x_px, y_px, width_px, height_px),
             border_radius=3,
             border_top_left_radius=30,
             border_top_right_radius=30,
         )
 
     def tile_y_top(self):
-        return self.y / self.game.tile_size
+        return self.y
 
     def tile_y_bottom(self):
         return self.tile_y_top() + self.height
 
     def tile_x_left(self):
-        return self.x / self.game.tile_size
+        return self.x
 
     def tile_x_right(self):
         return self.tile_x_left() + self.width
 
     def set_bottom(self, tile_y_bottom):
-        self.y = (tile_y_bottom - self.height) * self.game.tile_size
+        self.y = tile_y_bottom - self.height
 
     def set_left(self, tile_x_left):
-        self.x = tile_x_left * self.game.tile_size
+        self.x = tile_x_left
 
     def tile_bbox(self):
         return (
@@ -106,7 +110,7 @@ class Player(Drawable):
         right = self.game.level.is_in_ground(self.tile_x_right(), self.tile_y_bottom())
         return left or right
 
-    def is_in_beef(self, x, y, level: Level1):
+    def is_in_beef(self, level: Level1):
         # FIXME: Obviously not a proper collision check,
         # but bottom right corner will work fine most of the time
         tilemap_row = floor(self.tile_y_bottom())
@@ -117,7 +121,7 @@ class Player(Drawable):
         # PHYSICS
         # CHecking for collision with a solid tile (for y_velocity)
         new_y = self.y + self.velocity_y
-        new_tile_bottom_y = (new_y / self.game.tile_size) + self.height
+        new_tile_bottom_y = new_y + self.height
         would_hit_ground = self.game.level.is_in_ground(
             self.tile_x_left(), new_tile_bottom_y
         ) or self.game.level.is_in_ground(self.tile_x_right(), new_tile_bottom_y)
@@ -137,13 +141,13 @@ class Player(Drawable):
         self.y += self.velocity_y
         if not self.is_on_ground():
             # Acceleration due to gravity
-            self.velocity_y += self.weight
+            self.velocity_y += self.gravity
         else:
             # Reset velocity if we have hit the ground
             self.velocity_y = 0
 
         # GAME LOGIC
-        if self.is_in_beef(self.x, self.y, self.game.level):
+        if self.is_in_beef(self.game.level):
             self.target_width = 1.875  # 120px @ 64x
             self.target_height = 2.34375  # 150px @ 64x
         if self.tile_y_bottom() >= self.game.level.row_count() - 1:
@@ -200,7 +204,8 @@ class Game:
     def tick(self):
         # Event handling!
         for event in pygame.event.get():
-            base_speed = 5
+            base_speed = 5 / 64
+            jump_speed = 15 / 64
             if event.type == pygame.QUIT:
                 print("Exiting...")
                 pygame.mixer.music.stop()
@@ -219,7 +224,7 @@ class Game:
                     self.player.velocity_x = base_speed
                 elif event.key == pygame.K_SPACE:
                     if self.player.is_on_ground():
-                        self.player.velocity_y = -15
+                        self.player.velocity_y = -jump_speed
             elif event.type == pygame.KEYUP:
                 if event.key in [pygame.K_a, pygame.K_d]:
                     self.player.velocity_x = 0
