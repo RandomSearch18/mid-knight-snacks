@@ -11,6 +11,9 @@ GAME_TITLE = "😋 Mid-knight Snacks"
 class GameConfig:
     WINDOW_WIDTH = 64 * 17
     WINDOW_HEIGHT = 64 * 11
+    # Set PIXEL_PERFECT to False to let the game scale to fit any resolution, instead of just powers of 2
+    # Note that disabling PIXEL_PERFECT usually causes lines between the tiles to appear
+    PIXEL_PERFECT = True
 
 
 class Drawable:
@@ -189,6 +192,8 @@ class Game:
         max_tile_height = window_height / tiles_vertical
         # Use the shorter of the two lengths so that we know the level will fit on the screen in both dimensions
         max_tile_length = min(max_tile_width, max_tile_height)
+        if not self.config.PIXEL_PERFECT:
+            return max_tile_length
         # Work out the nearest power of 2 that's less than the max tile length
         log_len = log2(max_tile_length)
         return 2 ** floor(log_len)
