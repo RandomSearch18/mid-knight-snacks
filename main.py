@@ -167,6 +167,7 @@ class Game:
         self.window = pygame.display.set_mode(
             (self.config.WINDOW_WIDTH, self.config.WINDOW_HEIGHT), pygame.RESIZABLE
         )
+        self.window_width, self.window_height = self.window.get_size()
         self.player = Player(game=self)
         self.drawables = [self.player]
         self.clock = pygame.time.Clock()
@@ -198,6 +199,7 @@ class Game:
                 return
             elif event.type == pygame.VIDEORESIZE:
                 self.tile_size = self.calculate_best_tile_size()
+                self.window_width, self.window_height = event.size
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_a:
                     self.player.velocity_x = -base_speed
@@ -216,6 +218,7 @@ class Game:
             tickable.tick()
 
         # Update the screen!
+        self.window.fill("#212121")
         self.level.draw_tilemap(self.window, self.tile_size)
         for drawable in self.drawables:
             drawable.draw(self.window)
@@ -285,7 +288,7 @@ class Level1:
         tilemap_y = floor(y)
         return self.tile_at(tilemap_x, tilemap_y) == 1
 
-    def draw_tilemap(self, screen, tile_size):
+    def draw_tilemap(self, screen: pygame.Surface, tile_size):
         # Resize tile image to match the tile size
         # Idea: Cache these in memory (per tile_size) so that we're not resizing images every frame
         resized_tiles = {
@@ -294,8 +297,10 @@ class Level1:
         }
 
         # Start from a position such that the game will be centred
-        current_y = 0
-        initial_x = 0
+        level_height_px = len(self.tilemap) * tile_size
+        level_width_px = len(self.tilemap[0]) * tile_size
+        current_y = floor((screen.get_height() - level_height_px) / 2)
+        initial_x = floor((screen.get_width() - level_width_px) / 2)
 
         # Iterates through each element in the 2d array
         for row in range(len(self.tilemap)):
