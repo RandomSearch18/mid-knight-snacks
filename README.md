@@ -35,6 +35,10 @@ The original idea behind the game was that by completing levels, the player woul
 ![Screenshot of the game running on Linux](./demos/mid-knight-snacks.png)
 ![Screenshot of the game in a smaller window, showing how it can automatically resize](./demos/auto-resizing.png)
 
+### Epic fails
+
+![Graphics glitching out while working on resizable windows](./demos/graphics-fail.png)
+
 ## Demo video
 
 You can [download or view the demo video (1.5 MB, mp4)](./demos/Mid-Knight%20Snacks.mp4). It shows the game in the state it was in at the end the Counterspell game jam.
