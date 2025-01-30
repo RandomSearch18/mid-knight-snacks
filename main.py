@@ -172,12 +172,9 @@ class Game:
         self.drawables = [self.player]
         self.clock = pygame.time.Clock()
         self.level = Level1()
-        self.game_area = pygame.Surface(
-            (
-                self.level.row_count() * self.tile_size,
-                self.level.col_count() * self.tile_size,
-            )
-        )
+        # The game area is where all the tiles and game objects are drawn.
+        # It's surrounded by a dark border if the level doesn't perfectly fit the screen
+        self.game_area = self.calculate_game_area()
 
     def calculate_best_tile_size(self):
         # Work out how many big a tile would be if the level were to fit perfectly on the screen
@@ -191,6 +188,14 @@ class Game:
         # Work out the nearest power of 2 that's less than the max tile length
         log_len = log2(max_tile_length)
         return 2 ** floor(log_len)
+
+    def calculate_game_area(self):
+        return pygame.Surface(
+            (
+                self.level.row_count() * self.tile_size,
+                self.level.col_count() * self.tile_size,
+            )
+        )
 
     def tick(self):
         # Event handling!
@@ -206,6 +211,7 @@ class Game:
             elif event.type == pygame.VIDEORESIZE:
                 self.tile_size = self.calculate_best_tile_size()
                 self.window_width, self.window_height = event.size
+                self.game_area = self.calculate_game_area()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_a:
                     self.player.velocity_x = -base_speed
@@ -225,9 +231,13 @@ class Game:
 
         # Update the screen!
         self.window.fill("#212121")
-        self.level.draw_tilemap(self.window, self.tile_size)
+        self.level.draw_tilemap(self.game_area, self.tile_size)
         for drawable in self.drawables:
-            drawable.draw(self.window)
+            drawable.draw(self.game_area)
+        # Draw the game area centred on the screen
+        game_area_left = floor((self.window_width - self.game_area.get_width()) / 2)
+        game_area_top = floor((self.window_height - self.game_area.get_height()) / 2)
+        self.window.blit(self.game_area, (game_area_left, game_area_top))
         pygame.display.update()
 
     async def main_loop(self):
@@ -308,11 +318,9 @@ class Level1:
             for type, image in self.tile_images.items()
         }
 
-        # Start from a position such that the game will be centred
-        level_height_px = self.col_count() * tile_size
-        level_width_px = self.row_count() * tile_size
-        current_y = floor((screen.get_height() - level_height_px) / 2)
-        initial_x = floor((screen.get_width() - level_width_px) / 2)
+        # Start from the top left corner and keep track of where the next tile should be drawn
+        current_y = 0
+        initial_x = 0
 
         # Iterates through each element in the 2d array
         for row in range(len(self.tilemap)):
