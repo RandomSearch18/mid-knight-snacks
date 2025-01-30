@@ -36,9 +36,10 @@ The original idea behind the game was that by completing levels, the player woul
 
 <video controls src="demos/Mid-Knight Snacks.mp4" title="Mid-Knight Snacks demo video"></video>
 
-## Screenshot
+## Screenshots
 
 ![Screenshot of the game running on Linux](./demos/mid-knight-snacks.png)
+![Screenshot of the game in a smaller window, showing how it can automatically resize](./demos/auto-resizing.png)
 
 ## System requirements
 
