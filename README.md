@@ -30,6 +30,20 @@ You are a very hungry knight in a castle, and you've got to navigate the castle 
 
 The original idea behind the game was that by completing levels, the player would get larger and more unwieldy, thus making the player their own enemy.
 
+## Improvements made after Counterspell
+
+I focused on improving how the game functioned rather than adding any new gameplay, because my experience with making these changes will be more broadly useful in future games or projects. The important things I did to improve the game were to:
+
+- Fix the _incredibly_ botched Physics logic
+  - Turns out that creating something that actually works wasn't too hard, now that I've done it once
+- Make the game playable on the web
+- Slightly improve how the knight looks (even if he's still a solid-color rectangle)
+- Properly handle exiting the game area
+  - Including respawning with an animation
+  - Previously, the game would softlock if you jumped to far up, and crash if you walked too far right
+- Make the game window resizable, and make the level best fit the available space
+  - This included rewriting the game to use tiles as a coordinate system (rather than pixels)
+
 ## Screenshots
 
 ![Screenshot of the game running on Linux](./demos/mid-knight-snacks.png)
@@ -67,4 +81,6 @@ To just build the files without serving them, run `python -m pygbag --build .`
 
 ## Credits
 
-Developed by Andrew, Mish and Morgan.
+Developed by the dream team of Andrew, Mish and Morgan during Counterspell. Enhanced by Mish after the game jam.
+
+Made using [Pygame](https://www.pygame.org/), with [Pygbag](https://pygame-web.github.io/wiki/pygbag/) for the web distribution.
