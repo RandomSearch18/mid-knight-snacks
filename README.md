@@ -13,7 +13,7 @@ A castle- and beef-themed game, made during the [Counterspell](https://countersp
 
 Visit **[https://randomsearch18.github.io/mid-knight-snacks](https://randomsearch18.github.io/mid-knight-snacks/)** to play the game in your browser! Keyboard required.
 
-Alternative domain coming soon, maybe.
+You can also play it in the alternative domain of <https://knight.slevel.xyz/>.
 
 ### Run it locally
 
