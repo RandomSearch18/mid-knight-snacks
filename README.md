@@ -63,11 +63,11 @@ You can [download or view the demo video (1.5 MB, mp4)](./demos/Mid-Knight%20Sna
 
 These are the requirements for running the game locally:
 
-- A screen. (At least 1000x800 because the window isn't resizable)
+- A screen.
 - Windows, Linux, or MacOS
   - Fun fact: during the game jam, we used Windows and MacOS, and further development was done with Linux
 - You need a keyboard! Or something that can provide inputs for <kbd>A</kbd>, <kbd>D</kbd>, and <kbd>Space</kbd>
-- A modern version of Python. You can probably go down to maybe 3.8, but that hasn't been specifically tested
+- A modern version of Python. You can probably go down to something like v3.8, but that hasn't been specifically tested
 
 ## Building for the web
 
